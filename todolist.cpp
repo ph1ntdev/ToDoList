@@ -1,14 +1,16 @@
 // Developer Al'meria
 
-#include <cstddef>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <map>
+#include <string>
+#include <vector>
+#include <algorithm>
+
 
 using namespace std;
 namespace fs = std::filesystem;
-using FileDict = std::map<string, size_t>;
+using FileList = vector<string>;
 
 enum OpenedList {
     deleteTask,
@@ -28,47 +30,62 @@ struct toDoList {
 
 void listsActions() {
     cout << endl <<  "1. Create file." << endl;
-    cout << "2. Delete file." << endl;
-    cout << "3. Next page." << endl;
-    cout << "4. Previous page." << endl;
+    cout << "2. Open file" << endl;
+    cout << "3. Delete file." << endl;
     cout << "0. Close program." << endl << endl;
 }
 
-FileDict getFileDict() {
-    int count = 0;
-    FileDict fileDict;
+FileList getFileList() {
+    FileList fileList;
     for (const auto& entry : fs::directory_iterator("ToDoLists")){
-        count++;
-        fileDict[entry.path().filename().string()] = count;
+        fileList.push_back(entry.path().filename().string());
     }
-    return fileDict;
+    sort(fileList.begin(), fileList.end());
+
+    return fileList;
 }
 
-void displayLists(FileDict fileDict) {
-    for (auto& [filename, number] : fileDict) {
-        cout << number << ". " << filename << endl;
+void displayLists() {
+    FileList fileList = getFileList();
+    for (size_t i = 0; i < fileList.size(); ++i) {
+        cout << (i + 1) << ". " << fileList[i] << endl;
     }
 }
 
-void createList(FileDict fileDict) {
+void createList() {
     cout << "Enter your ToDoList name: ";
-    bool again = true;
-    while (again) {
-        string filename; cin >> filename;
-        if (fileDict.contains(filename)){
-            cout << "This file already exist. Create another file." << endl;
+    cin.ignore(10000, '\n');
+    FileList fileList = getFileList();
+    string filename;
+    getline(cin, filename);
+    if (ranges::binary_search(fileList, filename)){
+        cout << "This file already exist. Create another file." << endl << endl;
+    }
+    else {
+        ofstream file("ToDoLists/" + filename);
+        cout << "Your ToDoList has been successfully created." << endl << endl;
+        file.close();
+    }
+    displayLists();
+    listsActions();
+}
+
+void deleteList() {
+    cout << "Enter file number: ";
+    FileList fileList = getFileList();
+    int i; cin >> i;
+    cout << "Are you sure (yes/no): ";
+    string sure; cin >> sure;
+    if (sure == "yes"){
+        if (fs::remove("ToDoLists/" + fileList[i - 1])){
+            cout << "File has been successfully deleted." << endl << endl;
         }
         else {
-            ofstream file("ToDoLists/" + filename);
-            cout << "Your ToDoList has been successfully created." << endl;
-            file.close();
-            again = false;
+            cout << "This file doesn't exist." << endl;
         }
     }
-}
-
-void closeProgram() {
-    cout << "Good luck!" << endl;
+    displayLists();
+    listsActions();
 }
 
 /* ------------------------------------ */
@@ -76,8 +93,6 @@ void closeProgram() {
 int main() {
     // creating file system
     fs::create_directory("ToDoLists");
-
-    FileDict fileDict;
 
     cout << "Hello! Your ToDoLists: " << endl << endl;
 
@@ -91,27 +106,30 @@ int main() {
         while (again){
             int a; cin >> a;
             switch (a) {
-                case 1: createList(fileDict); again = false; break;
-                case 0: closeProgram(); again = false; break;
+                case 1: createList(); again = false; break;
+                case 0: cout << "Good luck!"; again = false; break;
                 default: cout << "You enter wrong number. Try again." << endl;
             }
         }
     }
     else {
-        fileDict = getFileDict();
-        displayLists(fileDict);
+        displayLists();
         listsActions();
+
+        bool again = true;
+        while (again) {
+            int a; cin >> a;
+
+            switch (a) {
+                case 1: createList(); break;
+                // case 2: openList(); break;
+                case 3: deleteList(); break;
+
+                case 0: cout << "Good luck!" << endl; again = false; break;
+                default: cout << endl << "Unknown comand." << endl << endl; displayLists(); listsActions(); break;
+            }
+        }
     }
-
-
-
-
-
-
-
-
-
-
 
     return 0;
 }
