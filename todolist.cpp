@@ -1,5 +1,6 @@
 // Developer Al'meria
 
+#include <cctype>
 #include <ios>
 #include <iostream>
 #include <fstream>
@@ -22,8 +23,11 @@ FileList getFileList();
 void displayLists();
 void createList();
 void deleteList();
-TaskFile createTask(TaskFile& taskFile);
-TaskFile editTask(TaskFile& taskFile);
+void createTask(TaskFile& taskFile);
+void editTask(TaskFile& taskFile);
+bool isMarked(TaskFile& taskFile, int& taskNum);
+void markTask(TaskFile& taskFile);
+void unmarkTask(TaskFile& taskFile);
 void displayList(TaskFile& taskFile);
 void openList();
 
@@ -120,21 +124,19 @@ void saveTasksInFile(string& filename, TaskFile& taskFile) {
     }
 }
 
-TaskFile createTask(TaskFile& taskFile) {
+void createTask(TaskFile& taskFile) {
     cin.ignore(10000, '\n');
     cout << "Enter your task: ";
     string task;
     getline(cin, task);
     if (task.empty()){
         cout << "Task can't be empty." << endl;
-        return taskFile;
+        return;
     }
     taskFile.push_back("[ ] " + task );
-
-    return taskFile;
 }
 
-TaskFile editTask(TaskFile& taskFile) {
+void editTask(TaskFile& taskFile) {
     cout << "Enter task number than needs to be changed: " << endl;
     int num; cin >> num;
     cout << "Enter changed task: " << endl;
@@ -144,9 +146,46 @@ TaskFile editTask(TaskFile& taskFile) {
     cout << "Are you sure (yes/no): " << endl;
     string sure; cin >> sure;
     if (sure == "yes") {
-        taskFile[num - 1] = task;
+        taskFile[num - 1] = "[ ] " + task;
     }
-    return taskFile;
+}
+
+bool isMarked(TaskFile& taskFile, int& taskNum) {
+    return taskFile[taskNum][1] == 'X';
+}
+
+void markTask(TaskFile& taskFile) {
+    cout << "Enter task number" << endl;
+    int num; cin >> num;
+    if (isdigit(num) && num < taskFile.size()) {
+        if (isMarked(taskFile, num)) {
+            cout << "Task already marked." << endl;
+        }
+        else {
+            taskFile[num][1] = 'X';
+            cout << "Successfully marked" << endl;
+        }
+    }
+    else {
+        cout << "Enter correct number" << endl;
+    }
+}
+
+void unmarkTask(TaskFile& taskFile) {
+    cout << "Enter task number" << endl;
+    int num; cin >> num;
+    if (isdigit(num) && num < taskFile.size()) {
+        if (!isMarked(taskFile, num)) {
+            cout << "Task already unmarked." << endl;
+        }
+        else {
+            taskFile[num][1] = ' ';
+            cout << "Successfully unmarked" << endl;
+        }
+    }
+    else {
+        cout << "Enter correct number" << endl;
+    }
 }
 
 void displayList(TaskFile& taskFile) {
@@ -188,20 +227,36 @@ void openList() {
                     continue;
                 }
             switch (cs) {
+                case 0:
+                    deleteTask(taskFile);
                 case 1:
-                    taskFile = createTask(taskFile);
+                    createTask(taskFile);
                     saveTasksInFile(fileList[i - 1], taskFile);
                     displayList(taskFile);
                     listActions();
                     break;
                 case 2:
-                    taskFile = editTask(taskFile);
+                    editTask(taskFile);
                     saveTasksInFile(fileList[i - 1], taskFile);
                     displayList(taskFile);
                     listActions();
                     break;
-
-                case 5: displayLists(); listsActions(); return;
+                case 3:
+                    markTask(taskFile);
+                    saveTasksInFile(fileList[i - 1], taskFile);
+                    displayList(taskFile);
+                    listActions();
+                    break;
+                case 4:
+                    unmarkTask(taskFile);
+                    saveTasksInFile(fileList[i - 1], taskFile);
+                    displayList(taskFile);
+                    listActions();
+                    break;
+                case 5:
+                    displayLists();
+                    listsActions();
+                    return;
                 default: cout << "Unknown comand" << endl << endl; int cs;
             }
         }
