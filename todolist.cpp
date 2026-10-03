@@ -12,6 +12,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 using FileList = vector<string>;
+using TaskFile = vector<string>;
 
 /* ------------------------------------ */
 
@@ -21,9 +22,10 @@ FileList getFileList();
 void displayLists();
 void createList();
 void deleteList();
-void createTask(string filename, int i);
-int displayList(ifstream& file);
-int openList();
+TaskFile createTask(TaskFile& taskFile);
+TaskFile editTask(TaskFile& taskFile);
+void displayList(TaskFile& taskFile);
+void openList();
 
 /* ------------------------------------ */
 
@@ -105,62 +107,96 @@ void deleteList() {
     listsActions();
 }
 
-void createTask(const string filename, int i) {
-    ofstream file("ToDoLists/" + filename, ios_base::app);
-    cout << "Enter your task: ";
+void saveTasksInFile(string& filename, TaskFile& taskFile) {
+    ofstream file("ToDoLists/" + filename);
+    if (file.is_open()) {
+        for (const auto& task : taskFile) {
+            file << task << endl;
+        }
+        file.close();
+    }
+    else {
+        cout << "File has not been saved." << endl;
+    }
+}
+
+TaskFile createTask(TaskFile& taskFile) {
     cin.ignore(10000, '\n');
+    cout << "Enter your task: ";
     string task;
     getline(cin, task);
     if (task.empty()){
         cout << "Task can't be empty." << endl;
-        file.close();
-        return;
+        return taskFile;
     }
-    file << i << ". [ ] " << task << endl;
-    file.close();
+    taskFile.push_back("[ ] " + task );
+
+    return taskFile;
 }
 
-int displayList(ifstream& file) {
-    cout << "------------------------------------" << endl;
+TaskFile editTask(TaskFile& taskFile) {
+
+}
+
+void displayList(TaskFile& taskFile) {
+    cout << endl << "------------------------------------" << endl;
     string line;
     int count = 0;
-    while (getline(file, line)){
+    for (const auto& task : taskFile) {
         count++;
-        cout << line << endl;
+        cout << count << ". " << task << endl;
     }
-    cout << "------------------------------------" << endl;
-    return count;
+    cout << "------------------------------------" << endl << endl;
 }
 
-int openList() {
-    cout << "Enter file number: " << endl;
+void openList() {
+    cout << "Enter file number: ";
     int i; cin >> i;
     FileList fileList = getFileList();
-    int curTasks;
     if (i <= fileList.size()) {
         ifstream file("ToDoLists/" + fileList[i - 1]);
         if (!file.is_open()) {
             cout << "Problem with opening file " << fileList[i - 1] << '.' << endl;
-            return 1;
+            return;
         }
-        curTasks = displayList(file);
-        listActions();
+        TaskFile taskFile;
+        string line;
+        while (getline(file, line)) {
+            taskFile.push_back(line);
+        }
         file.close();
+        displayList(taskFile);
+        listActions();
 
         while (true) {
-            int i; cin >> i;
-            switch (i) {
-                case 1: createTask(fileList[i - 1], curTasks); curTasks++; displayList(file); break;
+            int cs; cin >> cs;
+            if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cout << "Enter a number, not a letter!" << endl << endl;
+                    continue;
+                }
+            switch (cs) {
+                case 1:
+                    taskFile = createTask(taskFile);
+                    saveTasksInFile(fileList[i - 1], taskFile);
+                    displayList(taskFile);
+                    listActions();
+                    break;
+                case 2:
+                    taskFile = editTask(taskFile);
+                    saveTasksInFile(fileList[i - 1], taskFile);
+                    displayList(taskFile);
+                    listActions();
+                    break;
 
-                case 5: displayLists(); listActions(); return 0;
-                default: cout << "Unknown comand" << endl << endl;
+                case 5: displayLists(); listsActions(); return;
+                default: cout << "Unknown comand" << endl << endl; int cs;
             }
         }
     }
-    else {
-        cout << "Enter correct file number.";
-        return 1;
-    }
+    cout << "Enter correct file number.";
+
 
 }
 
