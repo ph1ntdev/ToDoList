@@ -135,7 +135,18 @@ TaskFile createTask(TaskFile& taskFile) {
 }
 
 TaskFile editTask(TaskFile& taskFile) {
-
+    cout << "Enter task number than needs to be changed: " << endl;
+    int num; cin >> num;
+    cout << "Enter changed task: " << endl;
+    cin.ignore(10000, '\n');
+    string task;
+    getline(cin, task);
+    cout << "Are you sure (yes/no): " << endl;
+    string sure; cin >> sure;
+    if (sure == "yes") {
+        taskFile[num - 1] = task;
+    }
+    return taskFile;
 }
 
 void displayList(TaskFile& taskFile) {
