@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <ios>
 #include <iostream>
 #include <fstream>
@@ -38,6 +39,9 @@ void openList();
 bool readInt(int& out) {
     cin >> out;
     if (cin.fail()) {
+        if(cin.eof()) {
+            exit(0);
+        }
         cin.clear();
         cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
         return false;
@@ -104,8 +108,13 @@ void createList() {
     }
     else {
         ofstream file("ToDoLists/" + filename);
-        cout << "\nYour ToDoList has been successfully created." << endl << endl;
-        file.close();
+        if(file.is_open()){
+            cout << "\nYour ToDoList has been successfully created." << endl << endl;
+            file.close();
+        }
+        else {
+            cout << "\nFile has not been created.";
+        }
     }
     displayLists();
     listsActions();
@@ -185,6 +194,10 @@ void editTask(TaskFile& taskFile) {
     cout << endl << "Enter changed task: ";
     string task;
     getline(cin, task);
+    if (task.empty()) {
+        cout << "\nTask can not be empty!\n";
+        return;
+    }
     cout << endl << "Are you sure (yes/no): ";
     string sure;
     getline(cin, sure);
