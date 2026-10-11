@@ -115,7 +115,7 @@ void deleteList() {
     cout << "Enter file number: ";
     FileList fileList = getFileList();
     int i;
-    if (readInt(i) || !validIndex(i, fileList.size())) {
+    if (!readInt(i) || !validIndex(i, fileList.size())) {
         cout << "Enter correct file number.\n\n";
     }
     else {
@@ -166,7 +166,6 @@ void deleteTask(TaskFile& taskFile) {
 
 void createTask(TaskFile& taskFile) {
     cout << "Enter your task: ";
-    cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
     string task;
     getline(cin, task);
     if (task.empty()){
@@ -188,7 +187,7 @@ void editTask(TaskFile& taskFile) {
     getline(cin, task);
     cout << endl << "Are you sure (yes/no): ";
     string sure;
-    getline(cin, task);
+    getline(cin, sure);
     if (sure == "yes") {
         taskFile[num - 1] = taskFile[num - 1].substr(0, 4) + task;
     }
@@ -268,31 +267,31 @@ void openList() {
 
     while (true) {
         int cs;
-        if (readInt(cs)) {
+        if (!readInt(cs)) {
             cout << "\nEnter correct number!\n\n";
             continue;
         }
         switch (cs) {
             case 0:
                 deleteTask(taskFile);
-                continue;
+                break;
             case 1:
                 createTask(taskFile);
-                continue;
+                break;
             case 2:
                 editTask(taskFile);
-                continue;
+                break;
             case 3:
                 markTask(taskFile);
-                continue;
+                break;
             case 4:
                 unmarkTask(taskFile);
-                continue;
+                break;
             case 5:
                 displayLists();
                 listsActions();
                 return;
-            default: cout << "\nUnknown command\n\n"; break;
+            default: cout << "\nUnknown command\n\n"; continue;
         }
         saveTasksInFile(fileList[i - 1], taskFile);
         displayList(taskFile, fileList[i - 1]);
