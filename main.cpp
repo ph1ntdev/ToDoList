@@ -192,6 +192,8 @@ void deleteTask(ToDoList& list) {
         if (list.remove(num)) std::cout << "\nTask was successfully deleted!";
         else std::cout << "\nEnter correct task number!";
     }
+    displayTask(list);
+    listActions();
 }
 
 void openList(ListStorage& storage, ToDoList& list) {
