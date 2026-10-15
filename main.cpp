@@ -1,8 +1,8 @@
 // Developer Al'meria
 
-#include "../include/ListStorage.h"
-#include "../include/ToDoList.h"
-#include "../include/Validation.h"
+#include "include/ListStorage.h"
+#include "include/ToDoList.h"
+#include "include/Validation.h"
 
 #include <cstddef>
 #include <cstdio>
